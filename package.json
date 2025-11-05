@@ -44,7 +44,8 @@
     "fix:biome-lint": "biome check --write --unsafe .",
     "typecheck": "tsc --noEmit",
     "release": "release-it",
-    "prepublishOnly": "pnpm run build"
+    "prepublishOnly": "pnpm run build",
+    "prepare": "husky"
   },
   "license": "MIT",
   "dependencies": {
@@ -58,6 +59,8 @@
     "@tsconfig/strictest": "^2.0.6",
     "@types/node": "^24.9.1",
     "esbuild": "^0.25.11",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.6",
     "npm-run-all2": "^8.0.4",
     "release-it": "^19.0.5",
     "release-it-pnpm": "^4.6.6",
