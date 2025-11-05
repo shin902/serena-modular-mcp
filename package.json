@@ -6,14 +6,14 @@
   "bin": {
     "modular-mcp": "./dist/index.js"
   },
-  "author": "d-kimuson",
+  "author": "shin902",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/d-kimuson/modular-mcp.git"
+    "url": "git+https://github.com/shin902/serena-modular-mcp.git"
   },
-  "homepage": "https://github.com/d-kimuson/modular-mcp#readme",
+  "homepage": "https://github.com/shin902/serena-modular-mcp#readme",
   "bugs": {
-    "url": "https://github.com/d-kimuson/modular-mcp/issues"
+    "url": "https://github.com/shin902/serena-modular-mcp/issues"
   },
   "keywords": [
     "mcp",
@@ -66,5 +66,11 @@
     "release-it-pnpm": "^4.6.6",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json}": [
+      "biome format --write",
+      "biome check --write"
+    ]
   }
 }
