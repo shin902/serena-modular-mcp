@@ -7,7 +7,7 @@ import * as v from "valibot";
 import packageJson from "../package.json" with { type: "json" };
 import { ClientManager } from "./client-manager.js";
 import { logger } from "./logger.js";
-import type { ServerConfig } from "./types.js";
+import type { ServerConfig, ToolInfo } from "./types.js";
 
 const getToolsSchema = v.object({
   group: v.string(),
@@ -28,6 +28,45 @@ const callCategoryToolSchema = v.object({
   name: v.string(),
   args: v.record(v.string(), v.any()),
 });
+
+/**
+ * Create a standardized error response
+ */
+function createErrorResponse(error: unknown): {
+  content: Array<{ type: string; text: string }>;
+  isError: true;
+} {
+  const errorDetails = error instanceof v.ValiError ? error.issues : error;
+
+  return {
+    content: [
+      {
+        type: "text",
+        text: JSON.stringify({
+          success: false,
+          error: errorDetails,
+        }),
+      },
+    ],
+    isError: true,
+  };
+}
+
+/**
+ * Remove $schema property from tool input schemas
+ */
+function sanitizeToolSchema(tool: ToolInfo): {
+  name: string;
+  description?: string;
+  inputSchema: Omit<ToolInfo["inputSchema"], "$schema">;
+} {
+  const { $schema: _schemaUrl, ...inputSchema } = tool.inputSchema;
+  return {
+    name: tool.name,
+    description: tool.description,
+    inputSchema: inputSchema,
+  };
+}
 
 export const createServer = async (config: ServerConfig) => {
   const manager = new ClientManager();
@@ -207,22 +246,13 @@ export const createServer = async (config: ServerConfig) => {
       case "get-category-tools": {
         const parsedArgs = v.safeParse(getCategoryToolsSchema, args);
         if (!parsedArgs.success) {
-          return {
-            content: [
-              {
-                type: "text",
-                text: JSON.stringify({
-                  success: false,
-                  error: parsedArgs.issues,
-                }),
-              },
-            ],
-            isError: true,
-          };
+          return createErrorResponse(parsedArgs.issues);
         }
 
         try {
-          const result = await manager.getCategoryTools(parsedArgs.output.category);
+          const result = await manager.getCategoryTools(
+            parsedArgs.output.category,
+          );
 
           return {
             content: [
@@ -233,35 +263,13 @@ export const createServer = async (config: ServerConfig) => {
             ],
           };
         } catch (error) {
-          return {
-            content: [
-              {
-                type: "text",
-                text: JSON.stringify({
-                  success: false,
-                  error: error instanceof Error ? error.message : String(error),
-                }),
-              },
-            ],
-            isError: true,
-          };
+          return createErrorResponse(error);
         }
       }
       case "call-category-tool": {
         const parsedArgs = v.safeParse(callCategoryToolSchema, args);
         if (!parsedArgs.success) {
-          return {
-            content: [
-              {
-                type: "text",
-                text: JSON.stringify({
-                  success: false,
-                  error: parsedArgs.issues,
-                }),
-              },
-            ],
-            isError: true,
-          };
+          return createErrorResponse(parsedArgs.issues);
         }
 
         try {
@@ -276,35 +284,13 @@ export const createServer = async (config: ServerConfig) => {
             isError: result.isError,
           };
         } catch (error) {
-          return {
-            content: [
-              {
-                type: "text",
-                text: JSON.stringify({
-                  success: false,
-                  error: error instanceof Error ? error.message : String(error),
-                }),
-              },
-            ],
-            isError: true,
-          };
+          return createErrorResponse(error);
         }
       }
       case "get-modular-tools": {
         const parsedArgs = v.safeParse(getToolsSchema, args);
         if (!parsedArgs.success) {
-          return {
-            content: [
-              {
-                type: "text",
-                text: JSON.stringify({
-                  success: false,
-                  error: parsedArgs.issues,
-                }),
-              },
-            ],
-            isError: true,
-          };
+          return createErrorResponse(parsedArgs.issues);
         }
 
         const tools = await manager.listTools(parsedArgs.output.group);
@@ -313,17 +299,7 @@ export const createServer = async (config: ServerConfig) => {
           content: [
             {
               type: "text",
-              text: JSON.stringify(
-                tools.map((tool) => {
-                  const { $schema: _schemaUrl, ...inputSchema } =
-                    tool.inputSchema;
-                  return {
-                    name: tool.name,
-                    description: tool.description,
-                    inputSchema: inputSchema,
-                  };
-                }),
-              ),
+              text: JSON.stringify(tools.map(sanitizeToolSchema)),
             },
           ],
         };
@@ -331,18 +307,7 @@ export const createServer = async (config: ServerConfig) => {
       case "call-modular-tool": {
         const parsedArgs = v.safeParse(callToolSchema, args);
         if (!parsedArgs.success) {
-          return {
-            content: [
-              {
-                type: "text",
-                text: JSON.stringify({
-                  success: false,
-                  error: parsedArgs.issues,
-                }),
-              },
-            ],
-            isError: true,
-          };
+          return createErrorResponse(parsedArgs.issues);
         }
 
         try {
@@ -357,18 +322,7 @@ export const createServer = async (config: ServerConfig) => {
             isError: result.isError,
           };
         } catch (error) {
-          return {
-            content: [
-              {
-                type: "text",
-                text: JSON.stringify({
-                  success: false,
-                  error: error instanceof Error ? error.message : String(error),
-                }),
-              },
-            ],
-            isError: true,
-          };
+          return createErrorResponse(error);
         }
       }
       default:

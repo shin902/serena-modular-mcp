@@ -1,5 +1,5 @@
-import { readFile, writeFile, readdir, stat } from "node:fs/promises";
-import { join, resolve, relative } from "node:path";
+import { readdir, readFile, stat, writeFile } from "node:fs/promises";
+import { join, resolve } from "node:path";
 import { globSync } from "glob";
 
 interface Tool {
@@ -19,7 +19,8 @@ interface Tool {
 export const fsTools: Tool[] = [
   {
     name: "mcp__serena__read_file",
-    description: "Read the contents of a file. For large files, use range parameters to read specific portions.",
+    description:
+      "Read the contents of a file. For large files, use range parameters to read specific portions.",
     inputSchema: {
       type: "object",
       properties: {
@@ -50,25 +51,31 @@ export const fsTools: Tool[] = [
           const selectedLines = lines.slice(start, end);
 
           return {
-            content: [{
-              type: "text",
-              text: `File: ${path} (lines ${start + 1}-${end})\n\n${selectedLines.join("\n")}`,
-            }],
+            content: [
+              {
+                type: "text",
+                text: `File: ${path} (lines ${start + 1}-${end})\n\n${selectedLines.join("\n")}`,
+              },
+            ],
           };
         }
 
         return {
-          content: [{
-            type: "text",
-            text: `File: ${path}\n\n${content}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `File: ${path}\n\n${content}`,
+            },
+          ],
         };
       } catch (error) {
         return {
-          content: [{
-            type: "text",
-            text: `Error reading file: ${error instanceof Error ? error.message : String(error)}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Error reading file: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
           isError: true,
         };
       }
@@ -97,17 +104,21 @@ export const fsTools: Tool[] = [
         await writeFile(path, String(args.content), "utf-8");
 
         return {
-          content: [{
-            type: "text",
-            text: `Successfully created file: ${path}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Successfully created file: ${path}`,
+            },
+          ],
         };
       } catch (error) {
         return {
-          content: [{
-            type: "text",
-            text: `Error creating file: ${error instanceof Error ? error.message : String(error)}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Error creating file: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
           isError: true,
         };
       }
@@ -138,21 +149,25 @@ export const fsTools: Tool[] = [
             const type = entry.isDirectory() ? "dir" : "file";
             const size = stats.size;
             return `${type.padEnd(4)} ${entry.name.padEnd(40)} ${size} bytes`;
-          })
+          }),
         );
 
         return {
-          content: [{
-            type: "text",
-            text: `Directory: ${dirPath}\n\n${items.join("\n")}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Directory: ${dirPath}\n\n${items.join("\n")}`,
+            },
+          ],
         };
       } catch (error) {
         return {
-          content: [{
-            type: "text",
-            text: `Error listing directory: ${error instanceof Error ? error.message : String(error)}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Error listing directory: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
           isError: true,
         };
       }
@@ -170,7 +185,8 @@ export const fsTools: Tool[] = [
         },
         cwd: {
           type: "string",
-          description: "Working directory to search from (default: process.cwd())",
+          description:
+            "Working directory to search from (default: process.cwd())",
         },
       },
       required: ["pattern"],
@@ -183,17 +199,21 @@ export const fsTools: Tool[] = [
         const files = globSync(pattern, { cwd, nodir: true });
 
         return {
-          content: [{
-            type: "text",
-            text: `Found ${files.length} files matching "${pattern}":\n\n${files.join("\n")}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Found ${files.length} files matching "${pattern}":\n\n${files.join("\n")}`,
+            },
+          ],
         };
       } catch (error) {
         return {
-          content: [{
-            type: "text",
-            text: `Error finding files: ${error instanceof Error ? error.message : String(error)}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Error finding files: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
           isError: true,
         };
       }
@@ -201,7 +221,8 @@ export const fsTools: Tool[] = [
   },
   {
     name: "mcp__serena__replace_regex",
-    description: "Replace text in a file using regular expressions. Use with caution to avoid catastrophic backtracking.",
+    description:
+      "Replace text in a file using regular expressions. Use with caution to avoid catastrophic backtracking.",
     inputSchema: {
       type: "object",
       properties: {
@@ -236,17 +257,21 @@ export const fsTools: Tool[] = [
         await writeFile(path, newContent, "utf-8");
 
         return {
-          content: [{
-            type: "text",
-            text: `Successfully replaced pattern in ${path}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Successfully replaced pattern in ${path}`,
+            },
+          ],
         };
       } catch (error) {
         return {
-          content: [{
-            type: "text",
-            text: `Error replacing text: ${error instanceof Error ? error.message : String(error)}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Error replacing text: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
           isError: true,
         };
       }
@@ -268,7 +293,8 @@ export const fsTools: Tool[] = [
         },
         cwd: {
           type: "string",
-          description: "Working directory to search from (default: process.cwd())",
+          description:
+            "Working directory to search from (default: process.cwd())",
         },
       },
       required: ["pattern", "filePattern"],
@@ -297,17 +323,21 @@ export const fsTools: Tool[] = [
         }
 
         return {
-          content: [{
-            type: "text",
-            text: `Found ${results.length} matches:\n\n${results.join("\n")}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Found ${results.length} matches:\n\n${results.join("\n")}`,
+            },
+          ],
         };
       } catch (error) {
         return {
-          content: [{
-            type: "text",
-            text: `Error searching: ${error instanceof Error ? error.message : String(error)}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Error searching: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
           isError: true,
         };
       }
