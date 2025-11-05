@@ -5,7 +5,9 @@
       "description": "社内コードベース操作に最適化された MCP。",
       "type": "stdio",
       "command": "node",
-      "args": ["/home/user/serena-modular-mcp/packages/serena-mcp/dist/index.js"],
+      "args": [
+        "/home/user/serena-modular-mcp/packages/serena-mcp/dist/index.js"
+      ],
       "env": {}
     }
   },

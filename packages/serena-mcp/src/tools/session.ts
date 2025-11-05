@@ -46,17 +46,21 @@ export const sessionTools: Tool[] = [
         sessionState.currentProject = path;
 
         return {
-          content: [{
-            type: "text",
-            text: `Project activated: ${path}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Project activated: ${path}`,
+            },
+          ],
         };
       } catch (error) {
         return {
-          content: [{
-            type: "text",
-            text: `Error activating project: ${error instanceof Error ? error.message : String(error)}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Error activating project: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
           isError: true,
         };
       }
@@ -64,7 +68,8 @@ export const sessionTools: Tool[] = [
   },
   {
     name: "mcp__serena__switch_modes",
-    description: "Switch between different operational modes (default, focus, explore).",
+    description:
+      "Switch between different operational modes (default, focus, explore).",
     inputSchema: {
       type: "object",
       properties: {
@@ -82,10 +87,12 @@ export const sessionTools: Tool[] = [
 
         if (!["default", "focus", "explore"].includes(mode)) {
           return {
-            content: [{
-              type: "text",
-              text: `Invalid mode: ${mode}. Valid modes: default, focus, explore`,
-            }],
+            content: [
+              {
+                type: "text",
+                text: `Invalid mode: ${mode}. Valid modes: default, focus, explore`,
+              },
+            ],
             isError: true,
           };
         }
@@ -99,17 +106,21 @@ export const sessionTools: Tool[] = [
         };
 
         return {
-          content: [{
-            type: "text",
-            text: `Switched to ${mode} mode: ${modeDescriptions[mode]}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Switched to ${mode} mode: ${modeDescriptions[mode]}`,
+            },
+          ],
         };
       } catch (error) {
         return {
-          content: [{
-            type: "text",
-            text: `Error switching modes: ${error instanceof Error ? error.message : String(error)}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Error switching modes: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
           isError: true,
         };
       }
@@ -132,17 +143,21 @@ export const sessionTools: Tool[] = [
         };
 
         return {
-          content: [{
-            type: "text",
-            text: `Current configuration:\n\n${JSON.stringify(config, null, 2)}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Current configuration:\n\n${JSON.stringify(config, null, 2)}`,
+            },
+          ],
         };
       } catch (error) {
         return {
-          content: [{
-            type: "text",
-            text: `Error getting config: ${error instanceof Error ? error.message : String(error)}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Error getting config: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
           isError: true,
         };
       }
@@ -164,21 +179,28 @@ export const sessionTools: Tool[] = [
       try {
         sessionState.onboardingPerformed = true;
         if (args.preferences) {
-          sessionState.config = { ...sessionState.config, ...args.preferences as object };
+          sessionState.config = {
+            ...sessionState.config,
+            ...(args.preferences as object),
+          };
         }
 
         return {
-          content: [{
-            type: "text",
-            text: `Onboarding completed. Session is ready.\n\nWelcome to Serena MCP! You can now:\n- Use fs tools to read/write files\n- Use code tools to navigate and modify code\n- Use memory tools to store information\n- Use session tools to manage your session\n- Use meta tools for planning and reflection`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Onboarding completed. Session is ready.\n\nWelcome to Serena MCP! You can now:\n- Use fs tools to read/write files\n- Use code tools to navigate and modify code\n- Use memory tools to store information\n- Use session tools to manage your session\n- Use meta tools for planning and reflection`,
+            },
+          ],
         };
       } catch (error) {
         return {
-          content: [{
-            type: "text",
-            text: `Error during onboarding: ${error instanceof Error ? error.message : String(error)}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Error during onboarding: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
           isError: true,
         };
       }
@@ -194,17 +216,21 @@ export const sessionTools: Tool[] = [
     handler: async () => {
       try {
         return {
-          content: [{
-            type: "text",
-            text: `Onboarding performed: ${sessionState.onboardingPerformed}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Onboarding performed: ${sessionState.onboardingPerformed}`,
+            },
+          ],
         };
       } catch (error) {
         return {
-          content: [{
-            type: "text",
-            text: `Error checking onboarding: ${error instanceof Error ? error.message : String(error)}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Error checking onboarding: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
           isError: true,
         };
       }
@@ -212,7 +238,8 @@ export const sessionTools: Tool[] = [
   },
   {
     name: "mcp__serena__prepare_for_new_conversation",
-    description: "Prepare the session for a new conversation (reset certain state).",
+    description:
+      "Prepare the session for a new conversation (reset certain state).",
     inputSchema: {
       type: "object",
       properties: {
@@ -233,17 +260,21 @@ export const sessionTools: Tool[] = [
         // Note: We don't reset onboarding or mode, as those typically persist
 
         return {
-          content: [{
-            type: "text",
-            text: `Session prepared for new conversation. ${keepProject ? "Project preserved." : "Project cleared."}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Session prepared for new conversation. ${keepProject ? "Project preserved." : "Project cleared."}`,
+            },
+          ],
         };
       } catch (error) {
         return {
-          content: [{
-            type: "text",
-            text: `Error preparing for new conversation: ${error instanceof Error ? error.message : String(error)}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Error preparing for new conversation: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
           isError: true,
         };
       }

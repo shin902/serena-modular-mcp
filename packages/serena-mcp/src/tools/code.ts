@@ -1,5 +1,5 @@
 import { readFile, writeFile } from "node:fs/promises";
-import { resolve, join } from "node:path";
+import { join, resolve } from "node:path";
 import { globSync } from "glob";
 
 interface Tool {
@@ -17,7 +17,10 @@ interface Tool {
 }
 
 // Helper to find symbols (functions, classes, etc.) in code
-function findSymbols(content: string, symbolName?: string): Array<{
+function findSymbols(
+  content: string,
+  symbolName?: string,
+): Array<{
   name: string;
   type: string;
   line: number;
@@ -38,7 +41,10 @@ function findSymbols(content: string, symbolName?: string): Array<{
     { type: "class", regex: /class\s+(\w+)/ },
     { type: "interface", regex: /interface\s+(\w+)/ },
     { type: "type", regex: /type\s+(\w+)\s*=/ },
-    { type: "export", regex: /export\s+(?:const|let|var|function|class)\s+(\w+)/ },
+    {
+      type: "export",
+      regex: /export\s+(?:const|let|var|function|class)\s+(\w+)/,
+    },
   ];
 
   lines.forEach((line, index) => {
@@ -64,7 +70,8 @@ function findSymbols(content: string, symbolName?: string): Array<{
 export const codeTools: Tool[] = [
   {
     name: "mcp__serena__get_symbols_overview",
-    description: "Get an overview of symbols (functions, classes, etc.) in a file or directory.",
+    description:
+      "Get an overview of symbols (functions, classes, etc.) in a file or directory.",
     inputSchema: {
       type: "object",
       properties: {
@@ -74,7 +81,8 @@ export const codeTools: Tool[] = [
         },
         filePattern: {
           type: "string",
-          description: "Glob pattern for files (default: '**/*.{ts,js,tsx,jsx}')",
+          description:
+            "Glob pattern for files (default: '**/*.{ts,js,tsx,jsx}')",
         },
       },
       required: ["path"],
@@ -85,9 +93,13 @@ export const codeTools: Tool[] = [
         const filePattern = String(args.filePattern || "**/*.{ts,js,tsx,jsx}");
 
         const files = globSync(filePattern, { cwd: path, nodir: true });
-        const allSymbols: Array<{ file: string; symbols: ReturnType<typeof findSymbols> }> = [];
+        const allSymbols: Array<{
+          file: string;
+          symbols: ReturnType<typeof findSymbols>;
+        }> = [];
 
-        for (const file of files.slice(0, 50)) { // Limit to 50 files
+        for (const file of files.slice(0, 50)) {
+          // Limit to 50 files
           const filePath = join(path, file);
           const content = await readFile(filePath, "utf-8");
           const symbols = findSymbols(content);
@@ -106,17 +118,21 @@ export const codeTools: Tool[] = [
           .join("\n\n");
 
         return {
-          content: [{
-            type: "text",
-            text: `Symbols overview:\n\n${output}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Symbols overview:\n\n${output}`,
+            },
+          ],
         };
       } catch (error) {
         return {
-          content: [{
-            type: "text",
-            text: `Error getting symbols: ${error instanceof Error ? error.message : String(error)}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Error getting symbols: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
           isError: true,
         };
       }
@@ -138,7 +154,8 @@ export const codeTools: Tool[] = [
         },
         filePattern: {
           type: "string",
-          description: "Glob pattern for files (default: '**/*.{ts,js,tsx,jsx}')",
+          description:
+            "Glob pattern for files (default: '**/*.{ts,js,tsx,jsx}')",
         },
       },
       required: ["symbolName"],
@@ -150,9 +167,11 @@ export const codeTools: Tool[] = [
         const filePattern = String(args.filePattern || "**/*.{ts,js,tsx,jsx}");
 
         const files = globSync(filePattern, { cwd: path, nodir: true });
-        const results: Array<{ file: string; line: number; content: string }> = [];
+        const results: Array<{ file: string; line: number; content: string }> =
+          [];
 
-        for (const file of files.slice(0, 100)) { // Limit to 100 files
+        for (const file of files.slice(0, 100)) {
+          // Limit to 100 files
           const filePath = join(path, file);
           const content = await readFile(filePath, "utf-8");
           const symbols = findSymbols(content, symbolName);
@@ -173,10 +192,12 @@ export const codeTools: Tool[] = [
 
         if (results.length === 0) {
           return {
-            content: [{
-              type: "text",
-              text: `Symbol "${symbolName}" not found`,
-            }],
+            content: [
+              {
+                type: "text",
+                text: `Symbol "${symbolName}" not found`,
+              },
+            ],
           };
         }
 
@@ -185,17 +206,21 @@ export const codeTools: Tool[] = [
           .join("\n\n");
 
         return {
-          content: [{
-            type: "text",
-            text: `Found "${symbolName}":\n\n${output}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Found "${symbolName}":\n\n${output}`,
+            },
+          ],
         };
       } catch (error) {
         return {
-          content: [{
-            type: "text",
-            text: `Error finding symbol: ${error instanceof Error ? error.message : String(error)}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Error finding symbol: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
           isError: true,
         };
       }
@@ -217,7 +242,8 @@ export const codeTools: Tool[] = [
         },
         filePattern: {
           type: "string",
-          description: "Glob pattern for files (default: '**/*.{ts,js,tsx,jsx}')",
+          description:
+            "Glob pattern for files (default: '**/*.{ts,js,tsx,jsx}')",
         },
       },
       required: ["symbolName"],
@@ -229,7 +255,8 @@ export const codeTools: Tool[] = [
         const filePattern = String(args.filePattern || "**/*.{ts,js,tsx,jsx}");
 
         const files = globSync(filePattern, { cwd: path, nodir: true });
-        const results: Array<{ file: string; line: number; content: string }> = [];
+        const results: Array<{ file: string; line: number; content: string }> =
+          [];
 
         const symbolRegex = new RegExp(`\\b${symbolName}\\b`, "g");
 
@@ -255,17 +282,21 @@ export const codeTools: Tool[] = [
           .join("\n");
 
         return {
-          content: [{
-            type: "text",
-            text: `Found ${results.length} references to "${symbolName}":\n\n${output}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Found ${results.length} references to "${symbolName}":\n\n${output}`,
+            },
+          ],
         };
       } catch (error) {
         return {
-          content: [{
-            type: "text",
-            text: `Error finding references: ${error instanceof Error ? error.message : String(error)}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Error finding references: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
           isError: true,
         };
       }
@@ -296,38 +327,44 @@ export const codeTools: Tool[] = [
       try {
         const path = resolve(String(args.path));
         const symbolName = String(args.symbolName);
-        const newBody = String(args.newBody);
+        const _newBody = String(args.newBody);
 
         const content = await readFile(path, "utf-8");
 
         // Simple implementation: find the symbol and replace its content
         // This is a simplified version; a real implementation would use an AST
-        const lines = content.split("\n");
+        const _lines = content.split("\n");
         const symbols = findSymbols(content, symbolName);
 
         if (symbols.length === 0) {
           return {
-            content: [{
-              type: "text",
-              text: `Symbol "${symbolName}" not found in ${path}`,
-            }],
+            content: [
+              {
+                type: "text",
+                text: `Symbol "${symbolName}" not found in ${path}`,
+              },
+            ],
             isError: true,
           };
         }
 
         // For simplicity, just note that this is a placeholder implementation
         return {
-          content: [{
-            type: "text",
-            text: `Note: replace_symbol_body is a simplified implementation. Found symbol "${symbolName}" at line ${symbols[0].line}. For actual replacement, use a code editor or IDE with AST support.`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Note: replace_symbol_body is a simplified implementation. Found symbol "${symbolName}" at line ${symbols[0].line}. For actual replacement, use a code editor or IDE with AST support.`,
+            },
+          ],
         };
       } catch (error) {
         return {
-          content: [{
-            type: "text",
-            text: `Error replacing symbol body: ${error instanceof Error ? error.message : String(error)}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Error replacing symbol body: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
           isError: true,
         };
       }
@@ -365,10 +402,12 @@ export const codeTools: Tool[] = [
 
         if (symbols.length === 0) {
           return {
-            content: [{
-              type: "text",
-              text: `Symbol "${symbolName}" not found in ${path}`,
-            }],
+            content: [
+              {
+                type: "text",
+                text: `Symbol "${symbolName}" not found in ${path}`,
+              },
+            ],
             isError: true,
           };
         }
@@ -380,17 +419,21 @@ export const codeTools: Tool[] = [
         await writeFile(path, lines.join("\n"), "utf-8");
 
         return {
-          content: [{
-            type: "text",
-            text: `Inserted content after "${symbolName}" at line ${insertLine} in ${path}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Inserted content after "${symbolName}" at line ${insertLine} in ${path}`,
+            },
+          ],
         };
       } catch (error) {
         return {
-          content: [{
-            type: "text",
-            text: `Error inserting after symbol: ${error instanceof Error ? error.message : String(error)}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Error inserting after symbol: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
           isError: true,
         };
       }
@@ -428,10 +471,12 @@ export const codeTools: Tool[] = [
 
         if (symbols.length === 0) {
           return {
-            content: [{
-              type: "text",
-              text: `Symbol "${symbolName}" not found in ${path}`,
-            }],
+            content: [
+              {
+                type: "text",
+                text: `Symbol "${symbolName}" not found in ${path}`,
+              },
+            ],
             isError: true,
           };
         }
@@ -443,17 +488,21 @@ export const codeTools: Tool[] = [
         await writeFile(path, lines.join("\n"), "utf-8");
 
         return {
-          content: [{
-            type: "text",
-            text: `Inserted content before "${symbolName}" at line ${insertLine + 1} in ${path}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Inserted content before "${symbolName}" at line ${insertLine + 1} in ${path}`,
+            },
+          ],
         };
       } catch (error) {
         return {
-          content: [{
-            type: "text",
-            text: `Error inserting before symbol: ${error instanceof Error ? error.message : String(error)}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Error inserting before symbol: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
           isError: true,
         };
       }
@@ -461,7 +510,8 @@ export const codeTools: Tool[] = [
   },
   {
     name: "mcp__serena__rename_symbol",
-    description: "Rename a symbol throughout the codebase (simple text replacement).",
+    description:
+      "Rename a symbol throughout the codebase (simple text replacement).",
     inputSchema: {
       type: "object",
       properties: {
@@ -479,7 +529,8 @@ export const codeTools: Tool[] = [
         },
         filePattern: {
           type: "string",
-          description: "Glob pattern for files (default: '**/*.{ts,js,tsx,jsx}')",
+          description:
+            "Glob pattern for files (default: '**/*.{ts,js,tsx,jsx}')",
         },
       },
       required: ["oldName", "newName"],
@@ -508,17 +559,21 @@ export const codeTools: Tool[] = [
         }
 
         return {
-          content: [{
-            type: "text",
-            text: `Renamed "${oldName}" to "${newName}" in ${filesModified} files`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Renamed "${oldName}" to "${newName}" in ${filesModified} files`,
+            },
+          ],
         };
       } catch (error) {
         return {
-          content: [{
-            type: "text",
-            text: `Error renaming symbol: ${error instanceof Error ? error.message : String(error)}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Error renaming symbol: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
           isError: true,
         };
       }

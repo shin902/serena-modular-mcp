@@ -18,7 +18,8 @@ const memoryStore = new Map<string, { value: string; timestamp: number }>();
 export const memoryTools: Tool[] = [
   {
     name: "mcp__serena__write_memory",
-    description: "Store information in memory for later retrieval during the conversation.",
+    description:
+      "Store information in memory for later retrieval during the conversation.",
     inputSchema: {
       type: "object",
       properties: {
@@ -44,17 +45,21 @@ export const memoryTools: Tool[] = [
         });
 
         return {
-          content: [{
-            type: "text",
-            text: `Memory stored with key: "${key}"`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Memory stored with key: "${key}"`,
+            },
+          ],
         };
       } catch (error) {
         return {
-          content: [{
-            type: "text",
-            text: `Error writing memory: ${error instanceof Error ? error.message : String(error)}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Error writing memory: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
           isError: true,
         };
       }
@@ -80,26 +85,32 @@ export const memoryTools: Tool[] = [
 
         if (!memory) {
           return {
-            content: [{
-              type: "text",
-              text: `No memory found with key: "${key}"`,
-            }],
+            content: [
+              {
+                type: "text",
+                text: `No memory found with key: "${key}"`,
+              },
+            ],
             isError: true,
           };
         }
 
         return {
-          content: [{
-            type: "text",
-            text: `Memory "${key}":\n\n${memory.value}\n\n(Stored: ${new Date(memory.timestamp).toISOString()})`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Memory "${key}":\n\n${memory.value}\n\n(Stored: ${new Date(memory.timestamp).toISOString()})`,
+            },
+          ],
         };
       } catch (error) {
         return {
-          content: [{
-            type: "text",
-            text: `Error reading memory: ${error instanceof Error ? error.message : String(error)}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Error reading memory: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
           isError: true,
         };
       }
@@ -116,32 +127,41 @@ export const memoryTools: Tool[] = [
       try {
         if (memoryStore.size === 0) {
           return {
-            content: [{
-              type: "text",
-              text: "No memories stored",
-            }],
+            content: [
+              {
+                type: "text",
+                text: "No memories stored",
+              },
+            ],
           };
         }
 
-        const memories = Array.from(memoryStore.entries()).map(([key, data]) => {
-          const preview = data.value.length > 50
-            ? `${data.value.substring(0, 50)}...`
-            : data.value;
-          return `- ${key}: ${preview} (${new Date(data.timestamp).toISOString()})`;
-        });
+        const memories = Array.from(memoryStore.entries()).map(
+          ([key, data]) => {
+            const preview =
+              data.value.length > 50
+                ? `${data.value.substring(0, 50)}...`
+                : data.value;
+            return `- ${key}: ${preview} (${new Date(data.timestamp).toISOString()})`;
+          },
+        );
 
         return {
-          content: [{
-            type: "text",
-            text: `Stored memories (${memoryStore.size}):\n\n${memories.join("\n")}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Stored memories (${memoryStore.size}):\n\n${memories.join("\n")}`,
+            },
+          ],
         };
       } catch (error) {
         return {
-          content: [{
-            type: "text",
-            text: `Error listing memories: ${error instanceof Error ? error.message : String(error)}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Error listing memories: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
           isError: true,
         };
       }
@@ -167,26 +187,32 @@ export const memoryTools: Tool[] = [
 
         if (!existed) {
           return {
-            content: [{
-              type: "text",
-              text: `No memory found with key: "${key}"`,
-            }],
+            content: [
+              {
+                type: "text",
+                text: `No memory found with key: "${key}"`,
+              },
+            ],
             isError: true,
           };
         }
 
         return {
-          content: [{
-            type: "text",
-            text: `Memory "${key}" deleted`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Memory "${key}" deleted`,
+            },
+          ],
         };
       } catch (error) {
         return {
-          content: [{
-            type: "text",
-            text: `Error deleting memory: ${error instanceof Error ? error.message : String(error)}`,
-          }],
+          content: [
+            {
+              type: "text",
+              text: `Error deleting memory: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
           isError: true,
         };
       }

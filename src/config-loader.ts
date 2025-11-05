@@ -11,34 +11,23 @@ import { type ServerConfig, serverConfigSchema } from "./types.js";
  */
 export const loadConfig = async (configPath: string): Promise<ServerConfig> => {
   const absolutePath = resolve(configPath);
+  const fileContent = await readFile(absolutePath, "utf-8");
 
-  const rawJson = await (async () => {
-    const fileContent = await readFile(absolutePath, "utf-8");
-
-    try {
-      const parsed: unknown = JSON.parse(fileContent);
-      return {
-        success: true,
-        data: parsed,
-      } as const;
-    } catch (error) {
-      return {
-        success: false,
-        error: new Error(
-          `Specified configuration file is not a valid json: ${absolutePath}`,
-          {
-            cause: error,
-          },
-        ),
-      } as const;
-    }
-  })();
-
-  if (!rawJson.success) {
-    throw rawJson.error;
+  // Parse JSON
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(fileContent);
+  } catch (error) {
+    throw new Error(
+      `Specified configuration file is not a valid json: ${absolutePath}`,
+      {
+        cause: error,
+      },
+    );
   }
 
-  const config = v.safeParse(serverConfigSchema, rawJson.data);
+  // Validate schema
+  const config = v.safeParse(serverConfigSchema, parsed);
 
   if (!config.success) {
     throw new Error(
