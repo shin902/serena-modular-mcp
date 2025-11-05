@@ -3,11 +3,11 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import { fsTools } from "./tools/fs.js";
 import { codeTools } from "./tools/code.js";
+import { fsTools } from "./tools/fs.js";
 import { memoryTools } from "./tools/memory.js";
-import { sessionTools } from "./tools/session.js";
 import { metaTools } from "./tools/meta.js";
+import { sessionTools } from "./tools/session.js";
 
 export function createServer() {
   const server = new Server(
@@ -19,7 +19,7 @@ export function createServer() {
       capabilities: {
         tools: {},
       },
-    }
+    },
   );
 
   // Collect all tools from all categories

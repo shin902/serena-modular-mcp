@@ -28,6 +28,11 @@ type GroupState =
       error: Error;
     };
 
+type ToolCallResponse = {
+  content: Array<{ type: string; text?: string; [key: string]: unknown }>;
+  isError?: boolean;
+};
+
 export class ClientManager {
   private groups = new Map<string, GroupState>();
   private categories = new Map<string, ResolvedCategory>();
@@ -112,7 +117,12 @@ export class ClientManager {
       }));
   }
 
-  async listTools(groupName: string): Promise<ToolInfo[]> {
+  /**
+   * Get a connected group or throw an error if not found/failed
+   */
+  private getConnectedGroup(
+    groupName: string,
+  ): Extract<GroupState, { status: "connected" }> {
     const group = this.groups.get(groupName);
     if (!group) {
       throw new Error(`Not connected to group: ${groupName}`);
@@ -120,7 +130,11 @@ export class ClientManager {
     if (group.status === "failed") {
       throw new Error(`Group ${groupName} failed to connect: ${group.error}`);
     }
+    return group;
+  }
 
+  async listTools(groupName: string): Promise<ToolInfo[]> {
+    const group = this.getConnectedGroup(groupName);
     return group.tools;
   }
 
@@ -128,17 +142,8 @@ export class ClientManager {
     groupName: string,
     toolName: string,
     args: Record<string, unknown>,
-  ): Promise<{
-    content: Array<{ type: string; text?: string; [key: string]: unknown }>;
-    isError?: boolean;
-  }> {
-    const group = this.groups.get(groupName);
-    if (!group) {
-      throw new Error(`Not connected to group: ${groupName}`);
-    }
-    if (group.status === "failed") {
-      throw new Error(`Group ${groupName} failed to connect: ${group.error}`);
-    }
+  ): Promise<ToolCallResponse> {
+    const group = this.getConnectedGroup(groupName);
 
     const response = await group.client.callTool({
       name: toolName,
@@ -194,9 +199,7 @@ export class ClientManager {
    * Get tools for a specific category
    * Applies includeNames filter and overrides
    */
-  async getCategoryTools(
-    categoryName: string,
-  ): Promise<{
+  async getCategoryTools(categoryName: string): Promise<{
     tools: Record<string, ToolInfo>;
     meta: {
       category: string;
@@ -249,7 +252,8 @@ export class ClientManager {
       meta: {
         category: categoryName,
         sourceServer: categoryConfig.server,
-        unavailableTools: unavailableTools.length > 0 ? unavailableTools : undefined,
+        unavailableTools:
+          unavailableTools.length > 0 ? unavailableTools : undefined,
       },
     };
   }
@@ -261,10 +265,7 @@ export class ClientManager {
     categoryName: string,
     toolName: string,
     args: Record<string, unknown>,
-  ): Promise<{
-    content: Array<{ type: string; text?: string; [key: string]: unknown }>;
-    isError?: boolean;
-  }> {
+  ): Promise<ToolCallResponse> {
     const categoryConfig = this.categoryConfigs[categoryName];
     if (!categoryConfig) {
       throw new Error(`Unknown category: ${categoryName}`);
@@ -323,9 +324,14 @@ export class ClientManager {
     }
 
     // Build overrides map
-    const overridesMap = new Map<string, { enabled: boolean; description?: string }>();
+    const overridesMap = new Map<
+      string,
+      { enabled: boolean; description?: string }
+    >();
     if (config.tools.overrides) {
-      for (const [toolName, override] of Object.entries(config.tools.overrides)) {
+      for (const [toolName, override] of Object.entries(
+        config.tools.overrides,
+      )) {
         overridesMap.set(toolName, override);
       }
     }
