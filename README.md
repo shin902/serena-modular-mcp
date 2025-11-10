@@ -1,37 +1,37 @@
 # Modular MCP
 
-A Model Context Protocol (MCP) proxy server that enables efficient management of large tool collections across multiple MCP servers by grouping them and loading tool schemas on-demand.
+複数の MCP サーバーを効率的に管理するための Model Context Protocol (MCP) プロキシサーバーです。ツールをグループ化し、必要に応じてツールスキーマをオンデマンドで読み込むことで、大規模なツールコレクションを扱えます。
 
-## Concept
+## コンセプト
 
-Traditional MCP setups can overwhelm LLM context when dealing with numerous tools from multiple servers. Modular MCP solves this by:
+従来の MCP セットアップでは、複数のサーバーから多数のツールを扱う際に LLM のコンテキストが圧迫されてしまいます。Modular MCP は以下の方法でこの問題を解決します：
 
-- **Context Efficiency**: Group information is embedded in tool descriptions, so LLMs can discover available groups without making any tool calls
-- **On-Demand Loading**: Retrieves detailed tool schemas only when needed for specific groups
-- **Separation of Concerns**: Maintains clear phases between tool discovery and execution
-- **Proxy Architecture**: Acts as a single MCP endpoint that manages multiple upstream MCP servers
+- **コンテキスト効率化**: グループ情報をツールの説明に埋め込むことで、LLM はツール呼び出しなしで利用可能なグループを発見できます
+- **オンデマンド読み込み**: 特定のグループに必要な詳細なツールスキーマのみを取得します
+- **関心の分離**: ツールの発見フェーズと実行フェーズを明確に区別します
+- **プロキシアーキテクチャ**: 複数のアップストリーム MCP サーバーを管理する単一の MCP エンドポイントとして機能します
 
-## How it works?
+## 仕組み
 
-### 1. Configuration
+### 1. 設定ファイルの作成
 
-Create a configuration file (e.g., `modular-mcp.json`) for the upstream MCP servers you want to manage. This uses the standard MCP server configuration format, with one addition: a `description` field for each server.
+管理したいアップストリーム MCP サーバーの設定ファイル（例：`modular-mcp.json`）を作成します。標準的な MCP サーバー設定フォーマットに、各サーバーの `description` フィールドを追加するだけです。
 
-Here's an example using Context7 and Playwright MCP servers:
+Context7 と Playwright MCP サーバーを使用する例：
 
 ```diff
 {
-+ "$schema": "https://raw.githubusercontent.com/d-kimuson/modular-mcp/refs/heads/main/config-schema.json",
++ "$schema": "https://raw.githubusercontent.com/shin902/serena-modular-mcp/refs/heads/main/config-schema.json",
   "mcpServers": {
     "context7": {
-+     "description": "Use when you need to search library documentation.",
++     "description": "ライブラリのドキュメント検索が必要な場合に使用",
 -     "type": "stdio",
       "command": "npx",
       "args": ["-y", "@upstash/context7-mcp@latest"],
       "env": {}
     },
     "playwright": {
-+     "description": "Use when you need to control or automate web browsers.",
++     "description": "Web ブラウザの制御や自動化が必要な場合に使用",
 -     "type": "stdio",
       "command": "npx",
       "args": ["-y", "@playwright/mcp@latest"],
@@ -41,13 +41,13 @@ Here's an example using Context7 and Playwright MCP servers:
 }
 ```
 
-The `description` field is the only extension to the standard MCP configuration. It helps the LLM understand each tool group's purpose without loading detailed tool schemas.
+`description` フィールドが標準 MCP 設定への唯一の拡張です。これにより、LLM は詳細なツールスキーマを読み込むことなく、各ツールグループの目的を理解できます。
 
-**Note**: The `type` field defaults to `"stdio"` if not specified. For `stdio` type servers, you can omit the `type` field for cleaner configuration.
+**注意**: `type` フィールドは指定しない場合、デフォルトで `"stdio"` になります。`stdio` タイプのサーバーでは、`type` フィールドを省略してよりシンプルな設定にできます。
 
-### 2. Register Modular MCP
+### 2. Modular MCP の登録
 
-Register Modular MCP in your MCP client configuration (e.g., `.mcp.json` for Claude Code):
+MCP クライアントの設定ファイル（Claude Code の場合は `.mcp.json`）に Modular MCP を登録します：
 
 ```json
 {
@@ -55,129 +55,79 @@ Register Modular MCP in your MCP client configuration (e.g., `.mcp.json` for Cla
     "modular-mcp": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@kimuson/modular-mcp", "modular-mcp.json"],
+      "args": ["-y", "serena-modular-mcp", "modular-mcp.json"],
       "env": {}
     }
   }
 }
 ```
 
-### 3. Two Tools Registration
+### 3. 2つのツールの登録
 
-When Modular MCP starts, it registers only two tools to the LLM:
+Modular MCP が起動すると、LLM には2つのツールのみが登録されます：
 
-- `get-modular-tools`: Retrieves tool name and schemas for a specific group
-- `call-modular-tool`: Executes a tool from a specific group
+- `get-modular-tools`: 特定のグループのツール名とスキーマを取得
+- `call-modular-tool`: 特定のグループのツールを実行
 
-The `get-modular-tools` tool description includes information about available groups, like this:
+`get-modular-tools` ツールの説明には、利用可能なグループの情報が含まれます：
 
 ```
-modular-mcp manages multiple MCP servers as organized groups, providing only the necessary group's tool descriptions to the LLM on demand instead of overwhelming it with all tool descriptions at once.
+modular-mcp は複数の MCP サーバーを整理されたグループとして管理し、すべてのツール説明で LLM を圧倒する代わりに、必要なグループのツール説明のみをオンデマンドで提供します。
 
-Use this tool to retrieve available tools in a specific group, then use call-modular-tool to execute them.
+このツールを使用して特定のグループで利用可能なツールを取得し、その後 call-modular-tool を使用してそれらを実行します。
 
-Available groups:
-- context7: Use when you need to search library documentation.
-- playwright: Use when you need to control or automate web browsers.
+利用可能なグループ:
+- context7: ライブラリのドキュメント検索が必要な場合に使用
+- playwright: Web ブラウザの制御や自動化が必要な場合に使用
 ```
 
-This description is passed to the LLM as part of the system prompt, allowing it to discover available groups without making any tool calls.
+この説明はシステムプロンプトの一部として LLM に渡されるため、ツール呼び出しなしで利用可能なグループを発見できます。
 
-### 4. On-Demand Tool Loading
+### 4. オンデマンドでのツール読み込み
 
-The LLM can now load and use tools on a per-group basis:
+LLM はグループ単位でツールを読み込んで使用できるようになります：
 
-1. **Discovery**: The LLM sees available groups in the tool description (no tool calls needed)
-2. **Exploration**: When the LLM needs playwright tools, it calls `get-modular-tools` with `group="playwright"`
-3. **Execution**: The LLM uses `call-modular-tool` to execute specific tools like `browser_navigate`
+1. **発見**: LLM はツールの説明で利用可能なグループを確認（ツール呼び出し不要）
+2. **探索**: LLM が playwright ツールを必要とする場合、`group="playwright"` で `get-modular-tools` を呼び出す
+3. **実行**: LLM は `call-modular-tool` を使用して `browser_navigate` などの特定のツールを実行
 
-For example, to automate a web browser:
+例えば、Web ブラウザを自動化する場合：
 ```
 get-modular-tools(group="playwright")
-→ Returns all playwright tool schemas
+→ すべての playwright ツールスキーマが返される
 
 call-modular-tool(group="playwright", name="browser_navigate", args={"url": "https://example.com"})
-→ Executes the navigation through the playwright MCP server
+→ playwright MCP サーバーを通じてナビゲーションを実行
 ```
 
-This workflow keeps context usage minimal while providing access to all tools when needed.
+このワークフローにより、コンテキスト使用量を最小限に抑えながら、必要なときにすべてのツールへのアクセスを提供します。
 
-## Benefits
+## 利点
 
-- **Reduced Context Usage**: Only loads tool information when actually needed
-- **Scalable**: Can manage dozens of MCP servers without overwhelming context
-- **Flexible**: Easy to add/remove tool groups without affecting others
-- **Transparent**: Tools execute exactly as if called directly on upstream servers
+- **コンテキスト使用量の削減**: 実際に必要なときのみツール情報を読み込む
+- **スケーラブル**: コンテキストを圧迫することなく、数十の MCP サーバーを管理可能
+- **柔軟性**: 他に影響を与えずにツールグループを簡単に追加・削除
+- **透過性**: ツールはアップストリームサーバーで直接呼び出されたかのように実行される
 
-## Included Packages
-
-This repository includes a reference implementation of an upstream MCP server:
-
-### @org/serena-mcp
-
-A complete MCP server package implementing 27 tools across 5 categories for code operations:
-
-**FS Category (6 tools)**: File system operations
-- `mcp__serena__read_file`: Read file contents with optional line range
-- `mcp__serena__create_text_file`: Create or overwrite files
-- `mcp__serena__list_dir`: List directory contents
-- `mcp__serena__find_file`: Find files using glob patterns
-- `mcp__serena__replace_regex`: Replace text using regex
-- `mcp__serena__search_for_pattern`: Search for patterns across files
-
-**Code Category (7 tools)**: Code navigation and manipulation
-- `mcp__serena__get_symbols_overview`: Get symbols overview
-- `mcp__serena__find_symbol`: Find symbol definitions
-- `mcp__serena__find_referencing_symbols`: Find symbol references
-- `mcp__serena__replace_symbol_body`: Replace symbol body
-- `mcp__serena__insert_after_symbol`: Insert code after symbol
-- `mcp__serena__insert_before_symbol`: Insert code before symbol
-- `mcp__serena__rename_symbol`: Rename symbols across codebase
-
-**Memory Category (4 tools)**: Session memory storage
-- `mcp__serena__write_memory`: Store session information
-- `mcp__serena__read_memory`: Retrieve stored information
-- `mcp__serena__list_memories`: List all memories
-- `mcp__serena__delete_memory`: Delete memory by key
-
-**Session Category (6 tools)**: Session management
-- `mcp__serena__activate_project`: Activate project directory
-- `mcp__serena__switch_modes`: Switch operational modes
-- `mcp__serena__get_current_config`: Get session configuration
-- `mcp__serena__onboarding`: Perform initial onboarding
-- `mcp__serena__check_onboarding_performed`: Check onboarding status
-- `mcp__serena__prepare_for_new_conversation`: Reset session state
-
-**Meta Category (4 tools)**: Metacognitive tools
-- `mcp__serena__think_about_collected_information`: Reflect on findings
-- `mcp__serena__think_about_task_adherence`: Evaluate task alignment
-- `mcp__serena__think_about_whether_you_are_done`: Assess completion
-- `mcp__serena__initial_instructions`: Get usage guidelines
-
-### Using Serena MCP with Category Mode
-
-See `serena-config.json` for an example configuration that uses category-based tool organization:
+## 開発
 
 ```bash
-# Build the packages
-pnpm install
-pnpm --filter @org/serena-mcp build
-pnpm build
-
-# Test with serena-config.json
-node dist/index.js serena-config.json
-```
-
-## Development
-
-```bash
-# Install dependencies
+# 依存関係のインストール
 pnpm install
 
-# Build all packages
+# ビルド
 pnpm build
 
-# Build specific package
-pnpm --filter @org/serena-mcp build
-pnpm --filter @kimuson/modular-mcp build
+# リント
+pnpm lint
+
+# 自動修正
+pnpm fix
+
+# 型チェック
+pnpm typecheck
 ```
+
+## ライセンス
+
+MIT
