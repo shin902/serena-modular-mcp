@@ -3,13 +3,18 @@
   "mcpServers": {
     "serena": {
       "description": "社内コードベース操作に最適化された MCP。",
-      "type": "stdio",
-      "command": "node",
-      "args": [
-        "/path/to/serena/dist/index.js"
-      ],
-      "env": {},
-      "_comment": "本家Serenaへのパスを指定してください。インストール方法: https://github.com/modelcontextprotocol/servers/tree/main/src/serena"
+      "serena": {
+        "command": "uvx",
+        "args": [
+          "--from",
+          "git+https://github.com/oraios/serena",
+          "serena",
+          "start-mcp-server"
+        ]
+      },
+      "env": {
+        "_comment": "本家Serenaの設定を参照して設定してください。公式GitHubページ: https://github.com/oraios/serena?tab=readme-ov-file"
+      }
     }
   },
   "_categoriesComment": "注意: 以下のcategoriesセクションは、本家Serenaの実際のツール名と一致しない可能性があります。本家Serenaのツールリストを確認して、必要に応じて調整してください。",
@@ -66,7 +71,8 @@
           "mcp__serena__write_memory",
           "mcp__serena__read_memory",
           "mcp__serena__list_memories",
-          "mcp__serena__delete_memory"
+          "mcp__serena__delete_memory",
+          "mcp__serena__edit_memory"
         ]
       }
     },
@@ -78,8 +84,8 @@
           "mcp__serena__activate_project",
           "mcp__serena__switch_modes",
           "mcp__serena__get_current_config",
-          "mcp__serena__onboarding",
           "mcp__serena__check_onboarding_performed",
+          "mcp__serena__onboarding",
           "mcp__serena__prepare_for_new_conversation"
         ],
         "overrides": {
