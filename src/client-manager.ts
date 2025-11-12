@@ -77,8 +77,8 @@ export class ClientManager {
 
   /**
    * List tools with retry logic to wait for upstream server to be ready
-   * Uses exponential backoff: 500ms, 1s, 2s, 4s, 8s with a maximum of 5 retries
-   * Total maximum wait time: ~15.5 seconds
+   * Uses exponential backoff with inter-attempt delays: 500ms, 1s, 2s, 4s (maximum 5 retries)
+   * Total maximum wait time: ~7.5 seconds
    * @param client - The MCP client
    * @param groupName - The group name for logging
    * @returns The list of tools from the upstream server
@@ -117,7 +117,7 @@ export class ClientManager {
       }
 
       if (attempt < maxRetries) {
-        // Exponential backoff: 500ms, 1s, 2s, 4s, 8s
+        // Exponential backoff inter-attempt delays: 500ms, 1s, 2s, 4s
         const waitMs = baseDelayMs * 2 ** (attempt - 1);
         await new Promise((resolve) => setTimeout(resolve, waitMs));
       }
