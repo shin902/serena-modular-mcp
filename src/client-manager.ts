@@ -63,7 +63,7 @@ export class ClientManager {
     const transport = getTransport(config);
 
     await client.connect(transport);
-    const tools = await this.listToolsWithRetry(client, groupName, 30, 2000);
+    const tools = await this.listToolsWithRetry(client, groupName);
 
     this.groups.set(groupName, {
       status: "connected",
@@ -77,18 +77,17 @@ export class ClientManager {
 
   /**
    * List tools with retry logic to wait for upstream server to be ready
+   * Uses linear backoff: 1s, 2s, 3s, 4s, 5s with a maximum of 5 retries
    * @param client - The MCP client
    * @param groupName - The group name for logging
-   * @param maxRetries - Maximum number of retries (default: 10)
-   * @param delayMs - Delay between retries in milliseconds (default: 1000)
    * @returns The list of tools from the upstream server
    */
   private async listToolsWithRetry(
     client: Client,
     groupName: string,
-    maxRetries: number = 10,
-    delayMs: number = 1000,
   ): Promise<ToolInfo[]> {
+    const maxRetries = 5;
+    const maxWaitMs = 5000; // Maximum single wait time
     let lastError: Error | null = null;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -100,10 +99,11 @@ export class ClientManager {
           );
           return tools;
         }
-        // Tools list is empty, might still be loading
+        // Tools list is empty, treat as success but log warning
         logger.warn(
-          `No tools available from "${groupName}" on attempt ${attempt}, retrying...`,
+          `No tools available from "${groupName}" on attempt ${attempt}`,
         );
+        return tools;
       } catch (error) {
         lastError =
           error instanceof Error
@@ -115,7 +115,9 @@ export class ClientManager {
       }
 
       if (attempt < maxRetries) {
-        await new Promise((resolve) => setTimeout(resolve, delayMs));
+        // Linear backoff: 1s, 2s, 3s, 4s, 5s
+        const waitMs = Math.min(attempt * 1000, maxWaitMs);
+        await new Promise((resolve) => setTimeout(resolve, waitMs));
       }
     }
 
