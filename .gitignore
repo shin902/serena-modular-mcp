@@ -145,4 +145,4 @@ vite.config.ts.timestamp-*
 .mcp.json
 test-serena-tools.ts
 
-serena-config.jsom
+serena-config.json
