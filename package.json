@@ -1,6 +1,6 @@
 {
   "name": "serena-modular-mcp",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Modular MCP - Modular tool access for reducing context overhead",
   "type": "module",
   "bin": {
