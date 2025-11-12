@@ -2,11 +2,13 @@
   "$schema": "https://raw.githubusercontent.com/shin902/serena-modular-mcp/refs/heads/main/config-schema.json",
   "mcpServers": {
     "serena": {
-      "description": "社内コードベース操作に最適化された MCP。",
-      "type": "stdio",
-      "command": "node",
+      "description": "本家 Serena MCP - LSP ベースのセマンティックなコード操作ツール（30+ 言語対応）。",
+      "command": "uvx",
       "args": [
-        "/home/user/serena-modular-mcp/packages/serena-mcp/dist/index.js"
+        "--from",
+        "git+https://github.com/oraios/serena",
+        "serena",
+        "start-mcp-server"
       ],
       "env": {}
     }
