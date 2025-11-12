@@ -2,6 +2,7 @@
   "$schema": "./config-schema.json",
   "mcpServers": {
     "serena": {
+      "type": "stdio",
       "description": "社内コードベース操作に最適化された MCP。",
       "command": "uvx",
       "args": [
