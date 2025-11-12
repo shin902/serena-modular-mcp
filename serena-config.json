@@ -3,15 +3,13 @@
   "mcpServers": {
     "serena": {
       "description": "社内コードベース操作に最適化された MCP。",
-      "serena": {
-        "command": "uvx",
-        "args": [
-          "--from",
-          "git+https://github.com/oraios/serena",
-          "serena",
-          "start-mcp-server"
-        ]
-      },
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/oraios/serena",
+        "serena",
+        "start-mcp-server"
+      ],
       "env": {
         "_comment": "本家Serenaの設定を参照して設定してください。公式GitHubページ: https://github.com/oraios/serena?tab=readme-ov-file"
       }
