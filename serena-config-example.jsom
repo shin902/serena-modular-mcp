@@ -2,8 +2,8 @@
   "$schema": "./config-schema.json",
   "mcpServers": {
     "serena": {
-      "description": "社内コードベース操作に最適化された MCP。",
       "type": "stdio",
+      "description": "社内コードベース操作に最適化された MCP。",
       "command": "uvx",
       "args": [
         "--from",
@@ -23,19 +23,19 @@
       "server": "serena",
       "tools": {
         "includeNames": [
-          "mcp__serena__read_file",
-          "mcp__serena__create_text_file",
-          "mcp__serena__list_dir",
-          "mcp__serena__find_file",
-          "mcp__serena__replace_regex",
-          "mcp__serena__search_for_pattern"
+          "read_file",
+          "create_text_file",
+          "list_dir",
+          "find_file",
+          "replace_regex",
+          "search_for_pattern"
         ],
         "overrides": {
-          "mcp__serena__read_file": {
+          "read_file": {
             "enabled": true,
             "description": "大きなファイルは範囲指定を推奨（O(n) 回避）。"
           },
-          "mcp__serena__replace_regex": {
+          "replace_regex": {
             "enabled": true,
             "description": "正規表現の安全性に注意（バックトラッキング過多を避ける）。"
           }
@@ -47,16 +47,16 @@
       "server": "serena",
       "tools": {
         "includeNames": [
-          "mcp__serena__get_symbols_overview",
-          "mcp__serena__find_symbol",
-          "mcp__serena__find_referencing_symbols",
-          "mcp__serena__replace_symbol_body",
-          "mcp__serena__insert_after_symbol",
-          "mcp__serena__insert_before_symbol",
-          "mcp__serena__rename_symbol"
+          "get_symbols_overview",
+          "find_symbol",
+          "find_referencing_symbols",
+          "replace_symbol_body",
+          "insert_after_symbol",
+          "insert_before_symbol",
+          "rename_symbol"
         ],
         "overrides": {
-          "mcp__serena__replace_symbol_body": {
+          "replace_symbol_body": {
             "enabled": false
           }
         }
@@ -67,11 +67,10 @@
       "server": "serena",
       "tools": {
         "includeNames": [
-          "mcp__serena__write_memory",
-          "mcp__serena__read_memory",
-          "mcp__serena__list_memories",
-          "mcp__serena__delete_memory",
-          "mcp__serena__edit_memory"
+          "write_memory",
+          "read_memory",
+          "list_memories",
+          "delete_memory"
         ]
       }
     },
@@ -80,15 +79,15 @@
       "server": "serena",
       "tools": {
         "includeNames": [
-          "mcp__serena__activate_project",
-          "mcp__serena__switch_modes",
-          "mcp__serena__get_current_config",
-          "mcp__serena__check_onboarding_performed",
-          "mcp__serena__onboarding",
-          "mcp__serena__prepare_for_new_conversation"
+          "activate_project",
+          "switch_modes",
+          "get_current_config",
+          "onboarding",
+          "check_onboarding_performed",
+          "prepare_for_new_conversation"
         ],
         "overrides": {
-          "mcp__serena__execute_shell_command": {
+          "execute_shell_command": {
             "enabled": false
           }
         }
@@ -99,10 +98,10 @@
       "server": "serena",
       "tools": {
         "includeNames": [
-          "mcp__serena__think_about_collected_information",
-          "mcp__serena__think_about_task_adherence",
-          "mcp__serena__think_about_whether_you_are_done",
-          "mcp__serena__initial_instructions"
+          "think_about_collected_information",
+          "think_about_task_adherence",
+          "think_about_whether_you_are_done",
+          "initial_instructions"
         ]
       }
     }
