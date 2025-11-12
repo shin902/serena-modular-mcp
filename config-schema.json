@@ -1,0 +1,106 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/shin902/serena-modular-mcp/refs/heads/main/config-schema.json",
+  "title": "Serena Modular MCP Configuration",
+  "description": "Configuration schema for Serena Modular MCP server and categories",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "JSON Schema reference"
+    },
+    "mcpServers": {
+      "type": "object",
+      "description": "MCP server configurations",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "Description of the MCP server"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["stdio", "sse"],
+            "description": "Server connection type"
+          },
+          "command": {
+            "type": "string",
+            "description": "Command to execute the server"
+          },
+          "args": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Command arguments"
+          },
+          "env": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Environment variables"
+          },
+          "_comment": {
+            "type": "string",
+            "description": "Optional comment field"
+          }
+        },
+        "required": ["type", "command"]
+      }
+    },
+    "_categoriesComment": {
+      "type": "string",
+      "description": "Optional comment about categories"
+    },
+    "categories": {
+      "type": "object",
+      "description": "Tool categories with server assignments",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "Category description"
+          },
+          "server": {
+            "type": "string",
+            "description": "Server name this category belongs to"
+          },
+          "tools": {
+            "type": "object",
+            "properties": {
+              "includeNames": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "List of tool names to include in this category"
+              },
+              "overrides": {
+                "type": "object",
+                "description": "Tool-specific configuration overrides",
+                "additionalProperties": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean",
+                      "description": "Whether the tool is enabled"
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Override description for the tool"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "required": ["description", "server"]
+      }
+    }
+  },
+  "required": ["mcpServers"]
+}
