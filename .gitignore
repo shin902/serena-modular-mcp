@@ -142,4 +142,4 @@ vite.config.ts.timestamp-*
 
 # Claude Code
 .claude/settings.local.json
-.mcp.json
+.mcp.jsontest-serena-tools.ts
