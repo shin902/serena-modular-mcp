@@ -99,11 +99,10 @@ export class ClientManager {
           );
           return tools;
         }
-        // Tools list is empty, treat as success but log warning
+        // Tools list is empty, server might still be initializing
         logger.warn(
-          `No tools available from "${groupName}" on attempt ${attempt}`,
+          `No tools available from "${groupName}" on attempt ${attempt}, retrying...`,
         );
-        return tools;
       } catch (error) {
         lastError =
           error instanceof Error
