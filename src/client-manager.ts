@@ -77,7 +77,8 @@ export class ClientManager {
 
   /**
    * List tools with retry logic to wait for upstream server to be ready
-   * Uses linear backoff: 1s, 2s, 3s, 4s, 5s with a maximum of 5 retries
+   * Uses exponential backoff: 500ms, 1s, 2s, 4s, 8s with a maximum of 5 retries
+   * Total maximum wait time: ~15.5 seconds
    * @param client - The MCP client
    * @param groupName - The group name for logging
    * @returns The list of tools from the upstream server
@@ -87,12 +88,14 @@ export class ClientManager {
     groupName: string,
   ): Promise<ToolInfo[]> {
     const maxRetries = 5;
-    const maxWaitMs = 5000; // Maximum single wait time
+    const baseDelayMs = 500; // Initial delay before exponential backoff
     let lastError: Error | null = null;
+    let lastTools: ToolInfo[] = [];
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         const { tools } = await client.listTools();
+        lastTools = tools;
         if (tools.length > 0) {
           logger.info(
             `Successfully retrieved ${tools.length} tools from "${groupName}" on attempt ${attempt}`,
@@ -114,10 +117,18 @@ export class ClientManager {
       }
 
       if (attempt < maxRetries) {
-        // Linear backoff: 1s, 2s, 3s, 4s, 5s
-        const waitMs = Math.min(attempt * 1000, maxWaitMs);
+        // Exponential backoff: 500ms, 1s, 2s, 4s, 8s
+        const waitMs = baseDelayMs * 2 ** (attempt - 1);
         await new Promise((resolve) => setTimeout(resolve, waitMs));
       }
+    }
+
+    // If all retries are exhausted but the last attempt returned an empty array without error
+    if (lastError === null && lastTools.length === 0) {
+      logger.warn(
+        `Server "${groupName}" returned 0 tools after ${maxRetries} attempts, but no errors occurred`,
+      );
+      return lastTools;
     }
 
     throw new Error(
