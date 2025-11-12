@@ -143,7 +143,3 @@ vite.config.ts.timestamp-*
 # Claude Code
 .claude/settings.local.json
 .mcp.json
-
-
-
-config-schema.json
