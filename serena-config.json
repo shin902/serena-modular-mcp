@@ -6,11 +6,13 @@
       "type": "stdio",
       "command": "node",
       "args": [
-        "/home/user/serena-modular-mcp/packages/serena-mcp/dist/index.js"
+        "/path/to/serena/dist/index.js"
       ],
-      "env": {}
+      "env": {},
+      "_comment": "本家Serenaへのパスを指定してください。インストール方法: https://github.com/modelcontextprotocol/servers/tree/main/src/serena"
     }
   },
+  "_categoriesComment": "注意: 以下のcategoriesセクションは、本家Serenaの実際のツール名と一致しない可能性があります。本家Serenaのツールリストを確認して、必要に応じて調整してください。",
   "categories": {
     "fs": {
       "description": "ファイル/ディレクトリの読み書きと検索。",
