@@ -5,6 +5,7 @@ import type {
 } from "@modelcontextprotocol/sdk/types.js";
 import * as v from "valibot";
 import type { ClientManager } from "../client-manager.js";
+import { logger } from "../logger.js";
 import { createErrorResponse, sanitizeToolSchema } from "./response-utils.js";
 import {
   callCategoryToolSchema,
@@ -204,12 +205,16 @@ async function handleGetCategoryTools(
       ],
     };
   } catch (error) {
+    logger.error(
+      `Failed to get category tools for "${parsedArgs.output.category}": ${error instanceof Error ? error.message : String(error)}`,
+    );
     return createErrorResponse(error);
   }
 }
 
 /**
  * Handle call-category-tool request
+ * @assumption Upstream MCP server responses conform to CallToolResult structure
  */
 async function handleCallCategoryTool(
   manager: ClientManager,
@@ -230,6 +235,9 @@ async function handleCallCategoryTool(
     // Type assertion: upstream MCP server response is compatible with CallToolResult
     return result as CallToolResult;
   } catch (error) {
+    logger.error(
+      `Failed to call tool "${parsedArgs.output.name}" in category "${parsedArgs.output.category}": ${error instanceof Error ? error.message : String(error)}`,
+    );
     return createErrorResponse(error);
   }
 }
@@ -260,6 +268,7 @@ async function handleGetModularTools(
 
 /**
  * Handle call-modular-tool request
+ * @assumption Upstream MCP server responses conform to CallToolResult structure
  */
 async function handleCallModularTool(
   manager: ClientManager,
@@ -280,6 +289,9 @@ async function handleCallModularTool(
     // Type assertion: upstream MCP server response is compatible with CallToolResult
     return result as CallToolResult;
   } catch (error) {
+    logger.error(
+      `Failed to call tool "${parsedArgs.output.name}" in group "${parsedArgs.output.group}": ${error instanceof Error ? error.message : String(error)}`,
+    );
     return createErrorResponse(error);
   }
 }

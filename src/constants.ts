@@ -11,13 +11,3 @@ export const RETRY_CONFIG = {
   /** Base delay in milliseconds before first retry (exponential backoff applied) */
   BASE_DELAY_MS: 500,
 } as const;
-
-/**
- * Git push retry configuration
- */
-export const GIT_PUSH_CONFIG = {
-  /** Maximum number of retry attempts for git push operations */
-  MAX_RETRIES: 4,
-  /** Initial delay in milliseconds before first retry */
-  INITIAL_DELAY_MS: 2000,
-} as const;
