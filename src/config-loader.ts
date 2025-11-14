@@ -31,7 +31,7 @@ export const loadConfig = async (configPath: string): Promise<ServerConfig> => {
 
   if (!config.success) {
     throw new Error(
-      `Specified configuration file is not satisfies the schema: ${absolutePath}`,
+      `Specified configuration file does not satisfy the schema: ${absolutePath}`,
       {
         cause: v.flatten(config.issues).nested,
       },

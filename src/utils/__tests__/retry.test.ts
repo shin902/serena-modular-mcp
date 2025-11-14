@@ -1,5 +1,6 @@
 import type { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { RETRY_CONFIG } from "../../constants.js";
 import type { ToolInfo } from "../../types.js";
 import { listToolsWithRetry } from "../retry.js";
 
@@ -91,20 +92,22 @@ describe("listToolsWithRetry", () => {
 
     const promise = listToolsWithRetry(mockClient, "test-group");
 
-    // Fast-forward through all retry delays
-    // Delays: 500ms, 1000ms, 2000ms, 4000ms
+    // Fast-forward through all retry delays using exponential backoff
+    // Delays: BASE_DELAY * 2^0, BASE_DELAY * 2^1, BASE_DELAY * 2^2, BASE_DELAY * 2^3
     const advancePromise = (async () => {
-      await vi.advanceTimersByTimeAsync(500);
-      await vi.advanceTimersByTimeAsync(1000);
-      await vi.advanceTimersByTimeAsync(2000);
-      await vi.advanceTimersByTimeAsync(4000);
+      await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 0);
+      await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 1);
+      await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 2);
+      await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 3);
     })();
 
     await expect(Promise.all([promise, advancePromise])).rejects.toThrow(
-      'Failed to retrieve tools from "test-group" after 5 attempts',
+      `Failed to retrieve tools from "test-group" after ${RETRY_CONFIG.MAX_RETRIES} attempts`,
     );
 
-    expect(mockClient.listTools).toHaveBeenCalledTimes(5);
+    expect(mockClient.listTools).toHaveBeenCalledTimes(
+      RETRY_CONFIG.MAX_RETRIES,
+    );
     vi.useRealTimers();
   });
 
@@ -116,19 +119,20 @@ describe("listToolsWithRetry", () => {
 
     const promise = listToolsWithRetry(mockClient, "test-group");
 
-    // Fast-forward through all retry delays
-    // Delays: 500ms, 1000ms, 2000ms, 4000ms
+    // Fast-forward through all retry delays using exponential backoff
     const advancePromise = (async () => {
-      await vi.advanceTimersByTimeAsync(500);
-      await vi.advanceTimersByTimeAsync(1000);
-      await vi.advanceTimersByTimeAsync(2000);
-      await vi.advanceTimersByTimeAsync(4000);
+      await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 0);
+      await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 1);
+      await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 2);
+      await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 3);
     })();
 
     const [result] = await Promise.all([promise, advancePromise]);
 
     expect(result).toEqual([]);
-    expect(mockClient.listTools).toHaveBeenCalledTimes(5);
+    expect(mockClient.listTools).toHaveBeenCalledTimes(
+      RETRY_CONFIG.MAX_RETRIES,
+    );
     vi.useRealTimers();
   });
 
@@ -178,11 +182,11 @@ describe("listToolsWithRetry", () => {
 
     const promise = listToolsWithRetry(mockClient, "test-group");
 
-    // Fast-forward through delays
-    // Delays should be: 500ms, 1000ms, 2000ms
-    await vi.advanceTimersByTimeAsync(500); // After first retry
-    await vi.advanceTimersByTimeAsync(1000); // After second retry
-    await vi.advanceTimersByTimeAsync(2000); // After third retry
+    // Fast-forward through delays using exponential backoff formula
+    // Delays: BASE_DELAY * 2^0, BASE_DELAY * 2^1, BASE_DELAY * 2^2
+    await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 0);
+    await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 1);
+    await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 2);
 
     const result = await promise;
 

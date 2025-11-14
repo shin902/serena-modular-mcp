@@ -2,6 +2,7 @@ import { mkdir, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { loadConfig } from "../config-loader.js";
+import { logger } from "../logger.js";
 
 describe("loadConfig", () => {
   const testDir = join(process.cwd(), "test-fixtures");
@@ -9,6 +10,10 @@ describe("loadConfig", () => {
 
   beforeEach(async () => {
     await mkdir(testDir, { recursive: true });
+    // Mock logger to reduce test output noise
+    vi.spyOn(logger, "info").mockImplementation(() => {});
+    vi.spyOn(logger, "warn").mockImplementation(() => {});
+    vi.spyOn(logger, "error").mockImplementation(() => {});
   });
 
   afterEach(async () => {
@@ -127,7 +132,7 @@ describe("loadConfig", () => {
     await writeFile(configPath, JSON.stringify(invalidConfig));
 
     await expect(loadConfig(configPath)).rejects.toThrow(
-      "Specified configuration file is not satisfies the schema",
+      "Specified configuration file does not satisfy the schema",
     );
   });
 
