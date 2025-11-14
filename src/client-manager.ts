@@ -11,6 +11,7 @@ import type {
   ResolvedCategory,
   ToolInfo,
 } from "./types.js";
+import { listToolsWithRetry } from "./utils/retry.js";
 
 type GroupState =
   | {
@@ -28,8 +29,18 @@ type GroupState =
       error: Error;
     };
 
+/**
+ * Tool call response from upstream MCP servers
+ * Simplified from CallToolResult for internal use
+ */
 type ToolCallResponse = {
-  content: Array<{ type: string; text?: string; [key: string]: unknown }>;
+  content: Array<{
+    type: string;
+    text?: string;
+    data?: string;
+    mimeType?: string;
+    [key: string]: unknown;
+  }>;
   isError?: boolean;
 };
 
@@ -63,7 +74,7 @@ export class ClientManager {
     const transport = getTransport(config);
 
     await client.connect(transport);
-    const tools = await this.listToolsWithRetry(client, groupName);
+    const tools = await listToolsWithRetry(client, groupName);
 
     this.groups.set(groupName, {
       status: "connected",
@@ -73,67 +84,6 @@ export class ClientManager {
       transport,
       tools,
     });
-  }
-
-  /**
-   * List tools with retry logic to wait for upstream server to be ready
-   * Uses exponential backoff with inter-attempt delays: 500ms, 1s, 2s, 4s (maximum 5 retries)
-   * Total maximum wait time: ~7.5 seconds
-   * @param client - The MCP client
-   * @param groupName - The group name for logging
-   * @returns The list of tools from the upstream server
-   */
-  private async listToolsWithRetry(
-    client: Client,
-    groupName: string,
-  ): Promise<ToolInfo[]> {
-    const maxRetries = 5;
-    const baseDelayMs = 500; // Initial delay before exponential backoff
-    let lastError: Error | null = null;
-    let lastTools: ToolInfo[] = [];
-
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        const { tools } = await client.listTools();
-        lastTools = tools;
-        if (tools.length > 0) {
-          logger.info(
-            `Successfully retrieved ${tools.length} tools from "${groupName}" on attempt ${attempt}`,
-          );
-          return tools;
-        }
-        // Tools list is empty, server might still be initializing
-        logger.warn(
-          `No tools available from "${groupName}" on attempt ${attempt}, retrying...`,
-        );
-      } catch (error) {
-        lastError =
-          error instanceof Error
-            ? error
-            : new Error(`Failed to list tools: ${String(error)}`);
-        logger.warn(
-          `Attempt ${attempt}/${maxRetries} to list tools from "${groupName}" failed: ${lastError.message}`,
-        );
-      }
-
-      if (attempt < maxRetries) {
-        // Exponential backoff inter-attempt delays: 500ms, 1s, 2s, 4s
-        const waitMs = baseDelayMs * 2 ** (attempt - 1);
-        await new Promise((resolve) => setTimeout(resolve, waitMs));
-      }
-    }
-
-    // If all retries are exhausted but the last attempt returned an empty array without error
-    if (lastError === null && lastTools.length === 0) {
-      logger.warn(
-        `Server "${groupName}" returned 0 tools after ${maxRetries} attempts, but no errors occurred`,
-      );
-      return lastTools;
-    }
-
-    throw new Error(
-      `Failed to retrieve tools from "${groupName}" after ${maxRetries} attempts. Last error: ${lastError?.message || "Unknown error"}`,
-    );
   }
 
   recordFailedConnection(
