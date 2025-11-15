@@ -92,13 +92,14 @@ describe("listToolsWithRetry", () => {
 
     const promise = listToolsWithRetry(mockClient, "test-group");
 
-    // Fast-forward through all retry delays using exponential backoff
-    // Delays: BASE_DELAY * 2^0, BASE_DELAY * 2^1, BASE_DELAY * 2^2, BASE_DELAY * 2^3
+    // Fast-forward through exponential backoff delays
+    // Attempt 1: immediate, Attempt 2: +500ms, Attempt 3: +1000ms, Attempt 4: +2000ms, Attempt 5: +4000ms
+    // Each delay = BASE_DELAY_MS * 2^(attempt - 1)
     const advancePromise = (async () => {
-      await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 0);
-      await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 1);
-      await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 2);
-      await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 3);
+      await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 0); // 500ms delay after attempt 1
+      await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 1); // 1000ms delay after attempt 2
+      await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 2); // 2000ms delay after attempt 3
+      await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 3); // 4000ms delay after attempt 4
     })();
 
     await expect(Promise.all([promise, advancePromise])).rejects.toThrow(
@@ -119,12 +120,14 @@ describe("listToolsWithRetry", () => {
 
     const promise = listToolsWithRetry(mockClient, "test-group");
 
-    // Fast-forward through all retry delays using exponential backoff
+    // Fast-forward through exponential backoff delays
+    // Attempt 1: immediate, Attempt 2: +500ms, Attempt 3: +1000ms, Attempt 4: +2000ms, Attempt 5: +4000ms
+    // Each delay = BASE_DELAY_MS * 2^(attempt - 1)
     const advancePromise = (async () => {
-      await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 0);
-      await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 1);
-      await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 2);
-      await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 3);
+      await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 0); // 500ms delay after attempt 1
+      await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 1); // 1000ms delay after attempt 2
+      await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 2); // 2000ms delay after attempt 3
+      await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 3); // 4000ms delay after attempt 4
     })();
 
     const [result] = await Promise.all([promise, advancePromise]);
@@ -182,11 +185,12 @@ describe("listToolsWithRetry", () => {
 
     const promise = listToolsWithRetry(mockClient, "test-group");
 
-    // Fast-forward through delays using exponential backoff formula
-    // Delays: BASE_DELAY * 2^0, BASE_DELAY * 2^1, BASE_DELAY * 2^2
-    await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 0);
-    await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 1);
-    await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 2);
+    // Fast-forward through exponential backoff delays
+    // Attempt 1: immediate, Attempt 2: +500ms, Attempt 3: +1000ms, Attempt 4: +2000ms
+    // Each delay = BASE_DELAY_MS * 2^(attempt - 1)
+    await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 0); // 500ms delay after attempt 1
+    await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 1); // 1000ms delay after attempt 2
+    await vi.advanceTimersByTimeAsync(RETRY_CONFIG.BASE_DELAY_MS * 2 ** 2); // 2000ms delay after attempt 3
 
     const result = await promise;
 

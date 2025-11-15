@@ -38,7 +38,7 @@ export const loadConfig = async (configPath: string): Promise<ServerConfig> => {
     );
   }
 
-  logger.info(`MCP server config loaded successfully.`);
+  logger.info("MCP server config loaded successfully.");
 
   // Validate categories if present
   if (config.output.categories) {
