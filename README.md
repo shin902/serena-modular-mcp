@@ -1,6 +1,10 @@
 # Modular MCP
 
+[![npm version](https://badge.fury.io/js/serena-modular-mcp.svg)](https://www.npmjs.com/package/serena-modular-mcp)
+
 複数の MCP サーバーを効率的に管理するための Model Context Protocol (MCP) プロキシサーバーです。ツールをグループ化し、必要に応じてツールスキーマをオンデマンドで読み込むことで、大規模なツールコレクションを扱えます。
+
+**npm**: https://www.npmjs.com/package/serena-modular-mcp
 
 ## コンセプト
 
