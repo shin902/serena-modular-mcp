@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
+import { isAbsolute, resolve } from "node:path";
 import * as v from "valibot";
 import { logger } from "./logger.js";
 import { type ServerConfig, serverConfigSchema } from "./types.js";
@@ -10,7 +10,9 @@ import { type ServerConfig, serverConfigSchema } from "./types.js";
  * @returns Parsed and validated configuration
  */
 export const loadConfig = async (configPath: string): Promise<ServerConfig> => {
-  const absolutePath = resolve(configPath);
+  const absolutePath = isAbsolute(configPath)
+    ? configPath
+    : resolve(configPath);
   const fileContent = await readFile(absolutePath, "utf-8");
 
   // Parse JSON
