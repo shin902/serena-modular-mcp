@@ -60,7 +60,7 @@
     "@biomejs/biome": "^2.2.6",
     "@tsconfig/node22": "^22.0.2",
     "@tsconfig/strictest": "^2.0.6",
-    "@types/node": "^24.9.1",
+    "@types/node": "^25.2.0",
     "@vitest/coverage-v8": "^4.0.9",
     "esbuild": "^0.27.0",
     "husky": "^9.1.7",
