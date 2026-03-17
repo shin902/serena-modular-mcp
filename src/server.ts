@@ -41,15 +41,25 @@ export const createServer = async (config: ServerConfig) => {
       `Successfully connected ${manager.listGroups().length} MCP groups. All groups are valid.`,
     );
   } else {
+    const failedGroups = manager.listFailedGroups();
     logger.warn(
       `Some MCP groups failed to connect. success_groups=[${manager
         .listGroups()
         .map((g) => g.name)
-        .join(", ")}], failed_groups=[${manager
-        .listFailedGroups()
+        .join(", ")}], failed_groups=[${failedGroups
         .map((g) => g.name)
         .join(", ")}]`,
     );
+
+    // Log detailed error information for debugging
+    for (const group of failedGroups) {
+      logger.warn(
+        `Details for failed group "${group.name}": ${group.error.message}`,
+      );
+      if (group.error.stack) {
+        logger.warn(`Stack trace: ${group.error.stack}`);
+      }
+    }
   }
 
   const server = new Server(

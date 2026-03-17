@@ -61,6 +61,10 @@ export class ClientManager {
       return;
     }
 
+    logger.info(
+      `Attempting to connect to MCP group "${groupName}" with type="${config.type}"`,
+    );
+
     const client = new Client(
       {
         name: `${packageJson.name}-client`,
@@ -75,6 +79,10 @@ export class ClientManager {
 
     await client.connect(transport);
     const tools = await listToolsWithRetry(client, groupName);
+
+    logger.info(
+      `Successfully connected to MCP group "${groupName}" with ${tools.length} tools`,
+    );
 
     this.groups.set(groupName, {
       status: "connected",
@@ -91,11 +99,16 @@ export class ClientManager {
     config: McpServerConfig,
     error: unknown,
   ): void {
+    const finalError =
+      error instanceof Error ? error : new Error(String(error));
+    logger.warn(
+      `Recording failed connection for "${groupName}". Error type: ${typeof error}, Error: ${String(error)}, Final error message: ${finalError.message}`,
+    );
     this.groups.set(groupName, {
       status: "failed",
       name: groupName,
       description: config.description,
-      error: error instanceof Error ? error : new Error(String(error)),
+      error: finalError,
     });
   }
 
